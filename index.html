@@ -67,7 +67,7 @@
   .row{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:11px 12px 11px 14px;border-left:4px solid #e6e8ec;border-bottom:1px solid var(--line)}
   .row .who b{display:block;font-size:15px;font-weight:700}
   .row .who small{display:block;font-size:12px;color:var(--muted)}
-  .row.chg{box-shadow:inset 0 0 0 2px #f2c94c}   /* 回答を変えた人：黄色い枠 */
+  .tag.chg{box-shadow:0 0 0 2.5px #f2c94c}   /* 回答を変えた項目：黄色い枠 */
   .row .who small.memo{margin-top:3px;color:#8a6100;background:#fff3d6;padding:2px 8px;border-radius:5px;display:inline-block;white-space:normal;line-height:1.4}
   .row.absent{background:#fff6f5;border-left-color:var(--absent)}
   .row.pending{background:#f3f7fd;border-left-color:var(--pending)}
@@ -408,6 +408,7 @@ var ICON = {
 var TAG = {'出席':['attend','出席'],'遅参':['late','遅参'],'欠席':['absent','欠席'],'未定':['pending','未定'],'出席（ZOOM）':['zoom','ZOOM'],'代理出席':['proxy','代理']};
 function tag(v){ var t = TAG[v]; return t ? '<span class="tag '+t[0]+'">'+t[1]+'</span>' : '<span class="tag noreply">未回答</span>'; }
 function partyTag(v){ if(!v) return '<span class="tag none">―</span>'; var t = TAG[v]; return t ? '<span class="tag '+t[0]+'">'+t[1]+'</span>' : '<span class="tag none">'+esc(v)+'</span>'; }
+function ring(h, on){ return on ? h.replace('class="tag ', 'class="tag chg ') : h; }   // 回答を変えた項目だけ黄色い枠
 function rowClass(p){ if(p.checkedIn) return 'in'; if(p.attend==='欠席') return 'absent'; if(p.attend==='未定') return 'pending'; if(!p.attend) return 'noreply'; return ''; }
 function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
 function yen(n){ return '¥' + (Number(n)||0).toLocaleString('ja-JP'); }
@@ -573,12 +574,12 @@ function render(d, id){
     if(!g[2].length) return;
     h += '<div class="grp"><span class="n">' + g[0] + '</span><span class="t">' + g[1] + '</span><span class="c">' + g[2].length + '名</span></div>';
     g[2].forEach(function(p){
-      h += '<div class="row ' + rowClass(p) + (p.chg ? ' chg' : '') + '"' + (p.chg ? ' title="' + esc(p.chg.when) + ' に回答を変更（' + esc([p.chg.attend ? '会議 ' + p.chg.attend : '', p.chg.party ? '懇親会 ' + p.chg.party : ''].filter(Boolean).join('／')) + '）"' : '') + '>' +
+      h += '<div class="row ' + rowClass(p) + '"' + (p.chg ? ' title="' + esc(p.chg.when) + ' に回答を変更（' + esc([p.chg.attend ? '会議 ' + p.chg.attend : '', p.chg.party ? '懇親会 ' + p.chg.party : ''].filter(Boolean).join('／')) + '）"' : '') + '>' +
            '<div class="who"><b>' + esc(p.name) + '</b><small>' + esc(subOf(p)) +
              (p.proxy ? '　代理：' + esc(p.proxy) : '') + (p.checkedIn ? '　<span class="in-mark">✔ 出席済</span>' : '') + '</small>' +
              (p.note ? '<small class="memo">💬 ' + esc(p.note) + '</small>' : '') + '</div>' +
-           '<div class="col"><em>会議</em>' + tag(p.attend) + '</div>' +
-           (hasParty ? '<div class="col"><em>懇親会</em>' + partyTag(p.party) + '</div>' : '<div></div>') +
+           '<div class="col"><em>会議</em>' + ring(tag(p.attend), p.chg && p.chg.attend) + '</div>' +
+           (hasParty ? '<div class="col"><em>懇親会</em>' + ring(partyTag(p.party), p.chg && p.chg.party) + '</div>' : '<div></div>') +
            '</div>';
     });
   });
