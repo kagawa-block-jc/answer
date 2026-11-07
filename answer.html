@@ -2,6 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>香川ブロック 出欠回答</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -241,6 +242,7 @@ function render(){
   var n5 = D.meetings.length > 1 ? '05' : '04';
   h += '<div class="step"><div class="h"><span class="n">' + n5 + '</span><span class="t">備考・オブザーバー</span><span class="opt">任意</span></div>' +
        '<textarea id="note" placeholder="例：懇親会は20時までで退席します／19:45頃に遅参します">' + esc(S.note) + '</textarea>' +
+       '<div style="font-size:11.5px;color:#6b7280;margin-top:4px">備考は出欠状況ページで対象者に見えます。欠席の理由（体調など）は書かなくて大丈夫です</div>' +
        '<div class="grid two" style="margin-top:10px">' + btn('obs','なし','', 'オブザーバー なし') + btn('obs','あり','', 'オブザーバー あり') + '</div>' +
        '<div class="sub' + (S.obs === 'あり' ? ' on' : '') + '" id="obsbox">' +
          '<label>オブザーバーの役職・氏名（複数は「、」区切り）</label><input type="text" id="obsNames" value="' + esc(S.obsNames) + '" placeholder="例：四国地区協議会会長 山本 祐樹（役職と姓名の間は空白）">' +

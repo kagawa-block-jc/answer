@@ -2,6 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>香川ブロック 出欠状況</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -66,6 +67,7 @@
   .row{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:11px 12px 11px 14px;border-left:4px solid #e6e8ec;border-bottom:1px solid var(--line)}
   .row .who b{display:block;font-size:15px;font-weight:700}
   .row .who small{display:block;font-size:12px;color:var(--muted)}
+  .row.chg{box-shadow:inset 0 0 0 2px #f2c94c}   /* 回答を変えた人：黄色い枠 */
   .row .who small.memo{margin-top:3px;color:#8a6100;background:#fff3d6;padding:2px 8px;border-radius:5px;display:inline-block;white-space:normal;line-height:1.4}
   .row.absent{background:#fff6f5;border-left-color:var(--absent)}
   .row.pending{background:#f3f7fd;border-left-color:var(--pending)}
@@ -571,7 +573,7 @@ function render(d, id){
     if(!g[2].length) return;
     h += '<div class="grp"><span class="n">' + g[0] + '</span><span class="t">' + g[1] + '</span><span class="c">' + g[2].length + '名</span></div>';
     g[2].forEach(function(p){
-      h += '<div class="row ' + rowClass(p) + '">' +
+      h += '<div class="row ' + rowClass(p) + (p.chg ? ' chg' : '') + '"' + (p.chg ? ' title="' + esc(p.chg.when) + ' に回答を変更（' + esc([p.chg.attend ? '会議 ' + p.chg.attend : '', p.chg.party ? '懇親会 ' + p.chg.party : ''].filter(Boolean).join('／')) + '）"' : '') + '>' +
            '<div class="who"><b>' + esc(p.name) + '</b><small>' + esc(subOf(p)) +
              (p.proxy ? '　代理：' + esc(p.proxy) : '') + (p.checkedIn ? '　<span class="in-mark">✔ 出席済</span>' : '') + '</small>' +
              (p.note ? '<small class="memo">💬 ' + esc(p.note) + '</small>' : '') + '</div>' +
