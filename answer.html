@@ -257,6 +257,8 @@ function render(){
   // 2 氏名
   h += '<div class="step" data-need="name"><div class="h"><span class="n">' + (D.meetings.length > 1 ? '02' : '01') + '</span><span class="t">お名前</span><span class="req">必須</span></div><div class="names">';
   var tg = targets(), last = '';
+  if(S.name && !tg.some(function(p){ return p.name === S.name; })) S.name = '';   // 前に選んだ名前が、この会議の対象でなければ外す
+  if(!tg.length) h += '<div class="whonote" style="color:#9b1c1c;font-weight:700">この会議の対象者が、まだ登録されていません。お手数ですが、事務局にお知らせください。</div>';
   tg.forEach(function(p){
     var g = groupOf(p);
     if(g !== last){ last = g; h += '<div class="g">' + g + '</div>'; }
