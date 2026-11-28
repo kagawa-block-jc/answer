@@ -354,7 +354,7 @@ document.addEventListener('error', function(e){ var t = e.target; if(t && t.tagN
 function __preImg(o){ try { Object.keys(o || {}).forEach(function(k){ var u = o[k]; if(typeof u === 'string' && u.indexOf('http') === 0){ var i = new Image(); i.src = u; } }); } catch(e){} }   // ポーズを切り替えたとき待たずに出るよう、先に読んでおく
 </script>
 <script>
-var PAGE_VERSION = '2026-11-24-5';   // 版の印（管理ページ「ページURL」の「更新の確認」で照らし合わせる）
+var PAGE_VERSION = '2026-11-28-1';   // 版の印（管理ページ「ページURL」の「更新の確認」で照らし合わせる）
 var D = null, TAB = 'meetings';
 function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
 function toast(m){ var t=document.getElementById('toast'); t.textContent=m; t.classList.add('on'); setTimeout(function(){t.classList.remove('on')},1800); }
@@ -1381,8 +1381,9 @@ function openPeople(id){
     var box = document.getElementById('pplBody'); if(!box) return;
     var R = P.rows || [], isZ = function(x){ return /ZOOM|オンライン/i.test(x.att); };
     var came = R.filter(function(x){ return x.inn; }), zoom = R.filter(function(x){ return !x.inn && isZ(x); });
-    var miss = R.filter(function(x){ return !x.inn && !isZ(x) && /出席|遅参|代理/.test(x.att); });
-    var abs = R.filter(function(x){ return !x.inn && !isZ(x) && !/出席|遅参|代理/.test(x.att); });
+    var miss = R.filter(function(x){ return !x.inn && !isZ(x) && /出席|遅参|代理|公職/.test(x.att); });
+    var kosh = [];
+    var abs = R.filter(function(x){ return !x.inn && !isZ(x) && !/出席|遅参|代理|公職/.test(x.att); });
     var party = R.filter(function(x){ return x.party; });
     var who = function(x){ return [x.l, x.y].filter(Boolean).join('　'); };
     var sec = function(title, list, cls, note){
@@ -1393,6 +1394,7 @@ function openPeople(id){
       sec('会議に来た人', came, 'ok', '受付をした人') +
       (zoom.length ? sec('ZOOMで参加', zoom, '') : '') +
       sec('来なかった人', miss, 'ng', '出席と答えていたが、受付をしていない人' + (P.locked ? '' : '（受付の付け忘れがないか確かめてから「確定」してください）')) +
+      (kosh.length ? sec('公職', kosh, '', '出向先の公務などで欠席（出席率では出席として数える）') : '') +
       sec('欠席', abs, '') +
       sec(esc(P.partyName || '懇親会') + 'に出た人', party, 'ok', '懇親会に出席と答えて受付をした人と、懇親会費を受け取った人') +
       (P.sheetUrl ? '<div style="margin-top:10px"><a href="' + esc(P.sheetUrl) + '" target="_blank" rel="noopener" style="font-size:13px">スプレッドシートの受付シートを開く ↗</a></div>' : '');
@@ -1400,7 +1402,7 @@ function openPeople(id){
     var cp = document.getElementById('pplCopy');
     if(cp){ cp.disabled = false; cp.onclick = function(){
       var line = function(t, l){ return '■' + t + '（' + l.length + '名）\n' + (l.length ? l.map(function(x){ return '・' + x.n + (who(x) ? '（' + who(x) + '）' : ''); }).join('\n') : '・なし'); };
-      var txt = [P.label + '　' + fmtD(P.date), line('会議に来た人', came)].concat(zoom.length ? [line('ZOOMで参加', zoom)] : []).concat([line('来なかった人', miss), line('欠席', abs), line((P.partyName || '懇親会') + 'に出た人', party)]).join('\n\n');
+      var txt = [P.label + '　' + fmtD(P.date), line('会議に来た人', came)].concat(zoom.length ? [line('ZOOMで参加', zoom)] : []).concat([line('来なかった人', miss)].concat(kosh.length ? [line('公職', kosh)] : []).concat([line('欠席', abs), line((P.partyName || '懇親会') + 'に出た人', party)])).join('\n\n');
       var fb = function(){ var ta = document.createElement('textarea'); ta.value = txt; ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select(); var ok = false; try { ok = document.execCommand('copy'); } catch(e){} ta.remove(); toast(ok ? 'コピーしました' : 'コピーできませんでした'); };
       if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(function(){ toast('コピーしました'); }, fb); else fb();
     }; }

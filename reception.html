@@ -315,7 +315,7 @@ document.addEventListener('error', function(e){ var t = e.target; if(t && t.tagN
 function __preImg(o){ try { Object.keys(o || {}).forEach(function(k){ var u = o[k]; if(typeof u === 'string' && u.indexOf('http') === 0){ var i = new Image(); i.src = u; } }); } catch(e){} }   // ポーズを切り替えたとき待たずに出るよう、先に読んでおく
 </script>
 <script>
-var PAGE_VERSION = '2026-11-24-5';   // 版の印（管理ページ「ページURL」の「更新の確認」で照らし合わせる）
+var PAGE_VERSION = '2026-11-28-1';   // 版の印（管理ページ「ページURL」の「更新の確認」で照らし合わせる）
 // 団体名（見出し用）：前に開いたときのものをすぐ使い、裏で最新を取る
 var ORG = {}; try { ORG = JSON.parse(localStorage.getItem('rec_org:' + location.pathname.replace(/[^\/]*$/, '')) || '{}') || {}; } catch(e){ ORG = {}; }
 var INIT = null;
@@ -499,7 +499,7 @@ function dueOf(p){ return p.checkedIn && ((p.feeMeeting > 0 && !p.paidMeeting) |
 function match(p){
   var q = document.getElementById('q').value.replace(/[\s　]+/g, '');   // 「山田太郎」「山田　太郎」どちらでも探せるように、空白は無視して比べる
   if(q && (p.name + p.lom + p.yaku + p.proxy).replace(/[\s　]+/g, '').indexOf(q) < 0) return false;
-  if(FILTER === 'yet') return !p.checkedIn && ['出席','遅参','代理出席'].indexOf(p.attend) >= 0;
+  if(FILTER === 'yet') return !p.checkedIn && ['出席','遅参','代理出席','公職'].indexOf(p.attend) >= 0;
   if(FILTER === 'due') return dueOf(p);
   if(FILTER === 'noreceipt') return p.checkedIn && (p.feeMeeting + p.feeParty + (p.feeOther||0)) > 0 && !p.receipt;
   if(FILTER === 'nodrink') return drinkTarget(p) && !p.drink;
@@ -514,6 +514,7 @@ function tagFor(p){
   if(p.attend === '代理出席') return '<span class="tag proxy">代理</span>';
   if(p.attend === '出席（ZOOM）') return '<span class="tag zoom">ZOOM</span>';
   if(p.attend === '欠席') return '<span class="tag absent">欠席</span>';
+  if(p.attend === '公職') return '<span class="tag proxy">公職</span>';
   if(p.attend === '遅参') return '<span class="tag">遅参</span>';
   if(p.attend === '出席') return '<span class="tag">出席</span>';
   if(p.attend === '未定') return '<span class="tag pending">未定</span>';
@@ -632,7 +633,7 @@ function item(p){
 }
 
 /* ---- 当日変更ダイアログ ---- */
-var ATT = ['出席','遅参','出席（ZOOM）','代理出席','欠席','未定'];
+var ATT = ['出席','遅参','出席（ZOOM）','代理出席','欠席','未定','公職'];
 var PTY = ['出席','遅参','欠席','未定','代理出席'];
 var FEE_M = 0, FEE_P = 0, FEE_O = 0;   // 会議の定価（全額ボタン用）
 var OTHER_VARIES = false;   // その他費が人によって違う（行事の会費が入っている）
@@ -661,13 +662,13 @@ function openChange(p){
   // 出欠ボタンを押したら金額の既定値を提案（出席系＝全額、それ以外＝0）。手で直せる
   Array.prototype.forEach.call(dlg.querySelectorAll('#o_att button'), function(b){ b.onclick = function(){
     Array.prototype.forEach.call(dlg.querySelectorAll('#o_att button'), function(x){ x.setAttribute('aria-pressed', x===b ? 'true':'false'); });
-    var comes = ['出席','遅参','代理出席'].indexOf(b.dataset.v) >= 0;
+    var comes = ['出席','遅参','代理出席','公職'].indexOf(b.dataset.v) >= 0;
     document.getElementById('f_m').value = comes ? FEE_M : 0;
     if(document.getElementById('f_o') && !OTHER_VARIES) document.getElementById('f_o').value = comes ? FEE_O : 0;   // 人によって違うとき（行事の会費）は、勝手に書き換えない
   }; });
   Array.prototype.forEach.call(dlg.querySelectorAll('#o_pty button'), function(b){ b.onclick = function(){
     Array.prototype.forEach.call(dlg.querySelectorAll('#o_pty button'), function(x){ x.setAttribute('aria-pressed', x===b ? 'true':'false'); });
-    var comes = ['出席','遅参','代理出席'].indexOf(b.dataset.v) >= 0;
+    var comes = ['出席','遅参','代理出席','公職'].indexOf(b.dataset.v) >= 0;
     document.getElementById('f_p').value = comes ? FEE_P : 0;
   }; });
   Array.prototype.forEach.call(dlg.querySelectorAll('[data-set]'), function(b){ b.onclick = function(){ document.getElementById(b.dataset.set).value = b.dataset.val; }; });

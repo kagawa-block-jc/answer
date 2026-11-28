@@ -82,6 +82,7 @@
   .tag.attend,.tag.late{background:var(--blue-soft);color:var(--blue)}
   .tag.zoom{background:var(--ok-bg);color:var(--ok)}
   .tag.proxy{background:#f6ecd3;color:#7a5a15}
+  .tag.koshoku{background:#e8eefc;color:#2a4a9a}
   .tag.absent{background:var(--absent);color:#fff}
   .tag.pending{background:var(--pending);color:#fff}
   .tag.noreply{background:var(--noreply);color:#fff}
@@ -423,7 +424,7 @@ window.google = { script: { run: (function(){
 function fitEn(){ var e = document.querySelector('.hero .en'); if(!e) return; e.style.fontSize = ''; var fs = parseFloat(getComputedStyle(e).fontSize) || 44; var n = 0; while(e.scrollWidth > e.clientWidth + 1 && fs > 22 && n++ < 30){ fs -= 2; e.style.fontSize = fs + 'px'; } }
 try { if(document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ fitEn(); }); } catch(e){}
 window.addEventListener('resize', function(){ fitEn(); });
-var PAGE_VERSION = '2026-11-24-5';   // 版の印（管理ページ「ページURL」の「更新の確認」で照らし合わせる）
+var PAGE_VERSION = '2026-11-28-1';   // 版の印（管理ページ「ページURL」の「更新の確認」で照らし合わせる）
 var ORG = {}, INIT = null;
 // 最初の表示に必要なものを1回で取ってから、ページ本体を動かす。
 // 2回目からは、前に開いたときの内容をすぐ出して（待ち時間なし）、裏で最新を取りに行く。変わっていたら入れ替える
@@ -468,7 +469,7 @@ var ICON = {
   list:'<svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>',
   cup:'<svg viewBox="0 0 24 24"><path d="M8 3h8l-1 9a3 3 0 0 1-6 0L8 3z"/><path d="M12 15v5M8 20h8"/></svg>'
 };
-var TAG = {'出席':['attend','出席'],'遅参':['late','遅参'],'欠席':['absent','欠席'],'未定':['pending','未定'],'出席（ZOOM）':['zoom','ZOOM'],'代理出席':['proxy','代理']};
+var TAG = {'出席':['attend','出席'],'遅参':['late','遅参'],'欠席':['absent','欠席'],'未定':['pending','未定'],'出席（ZOOM）':['zoom','ZOOM'],'代理出席':['proxy','代理'],'公職':['koshoku','公職']};
 function tag(v){ var t = TAG[v]; return t ? '<span class="tag '+t[0]+'">'+t[1]+'</span>' : '<span class="tag noreply">未回答</span>'; }
 function partyTag(v){ if(!v) return '<span class="tag none">―</span>'; var t = TAG[v]; return t ? '<span class="tag '+t[0]+'">'+t[1]+'</span>' : '<span class="tag none">'+esc(v)+'</span>'; }
 function ring(h, on){ return on ? h.replace('class="tag ', 'class="tag chg ') : h; }   // 回答を変えた項目だけ黄色い枠
@@ -552,7 +553,7 @@ function backToAnswer(show){
   var how = function(){
     var has = document.getElementById('s-answer');
     m.innerHTML = '<b>回答のしかた</b><div style="font-size:13px;line-height:1.7;margin:0 2px">' +
-      ['「出欠を回答する」を開く', '自分の名前を押す', '会議の出欠（出席・遅参・ZOOM・欠席・未定・代理）を選ぶ', '懇親会の出欠を選ぶ', '「回答を送信する」を押す'].map(function(t, i){ return '<div style="display:flex;gap:8px;margin:5px 0"><span style="flex:none;width:22px;height:22px;border-radius:50%;background:var(--blue);color:#fff;font-weight:900;font-size:12px;line-height:22px;text-align:center">' + (i + 1) + '</span><span>' + t + '</span></div>'; }).join('') +
+      ['「出欠を回答する」を開く', '自分の名前を押す', '会議の出欠（出席・遅参・ZOOM・欠席・未定・代理・公職）を選ぶ', '懇親会の出欠を選ぶ', '「回答を送信する」を押す'].map(function(t, i){ return '<div style="display:flex;gap:8px;margin:5px 0"><span style="flex:none;width:22px;height:22px;border-radius:50%;background:var(--blue);color:#fff;font-weight:900;font-size:12px;line-height:22px;text-align:center">' + (i + 1) + '</span><span>' + t + '</span></div>'; }).join('') +
       '<div style="font-size:12px;color:var(--muted);margin-top:6px">変更するときは、同じ手順でもう一度送ると上書きされます。締切のあとでも当日でも変えられます。みんなの出欠は「みんなの出欠を見る」で確認できます</div></div>' +
       (has ? '<button type="button" data-how="go" style="background:var(--blue);color:#fff;border-color:var(--blue);text-align:center">回答する場所へ移動する</button>' : '<div style="font-size:12px;color:var(--muted);margin:8px 2px 0">いまは回答を受け付けている会議がありません。案内が届いたら、そのURLから回答できます</div>') +
       '<button type="button" data-how="back">← 戻る</button>';
@@ -719,8 +720,9 @@ function render(d, id){
   // 出欠
   h += '<section id="s-status" class="dots"><div class="h"><div class="jp">出 欠</div><div class="en">ATTENDANCE</div></div>' +
        '<div class="stats">' +
-       '<div class="stat ok"><b>' + c.comes + '</b><span>出席予定</span>' + (obsN ? '<em class="plus">オブザーバー +' + obsN + '名</em>' : '') + '</div>' +
+       '<div class="stat ok"><b>' + (c.comes - (c.koshoku || 0)) + '</b><span>出席予定</span>' + (obsN ? '<em class="plus">オブザーバー +' + obsN + '名</em>' : '') + '</div>' +
        '<div class="stat"><b>' + c.zoom + '</b><span>ZOOM</span></div>' +
+       (c.koshoku ? '<div class="stat"><b>' + c.koshoku + '</b><span>うち公職</span></div>' : '') +
        '<div class="stat absent"><b>' + c.absent + '</b><span>欠席</span></div>' +
        '<div class="stat pending"><b>' + c.pending + '</b><span>未定</span></div>' +
        '<div class="stat noreply"><b>' + c.noreply + '</b><span>未回答</span></div>' +
